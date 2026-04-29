@@ -1,5 +1,9 @@
 # Copyright 2020-2025 ETH Zurich and the SeBS authors. All rights reserved.
-#torch==1.2.0+cpu
-#torchvision==0.4.0+cpu
-#https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp37-cp37m-linux_x86_64.whl
-#torch==1.0.1.post2+cpu
+# Use the CPU-only PyTorch wheel index as the primary index so pip never
+# downloads CUDA variants.  --extra-index-url re-adds PyPI so non-torch
+# packages (Pillow) are still resolved normally.
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple/
+torch
+torchvision
+Pillow
