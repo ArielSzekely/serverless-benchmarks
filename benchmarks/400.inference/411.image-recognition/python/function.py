@@ -46,7 +46,7 @@ def handler(event):
         model_download_end = datetime.datetime.now()
         model_process_begin = datetime.datetime.now()
         model = resnet50(pretrained=False)
-        model.load_state_dict(torch.load(model_path))
+        model.load_state_dict(torch.load(model_path, weights_only=False))
         model.eval()
         model_process_end = datetime.datetime.now()
     else:
