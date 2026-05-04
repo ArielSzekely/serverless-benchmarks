@@ -3,6 +3,7 @@ import datetime
 import io
 import os
 import sys
+import time
 import uuid
 from urllib.parse import unquote_plus
 from PIL import Image
@@ -40,9 +41,16 @@ def handler(event):
     #client.download(input_bucket, key, download_path)
     #resize_image(download_path, upload_path, width, height)
     #client.upload(output_bucket, key, upload_path)
+    transfer_start = time.perf_counter()
     download_begin = datetime.datetime.now()
     img = client.download_stream(bucket, os.path.join(input_prefix, key))
     download_end = datetime.datetime.now()
+    if client._delegated:
+        client._clnt.log_spawn_latency("Paper.Initialization.TransferState",
+                                       int((time.perf_counter() - transfer_start) * 1_000_000))
+    else:
+        client._clnt.log_spawn_latency("Paper.Initialization.DownloadState",
+                                       int((time.perf_counter() - transfer_start) * 1_000_000))
 
     process_begin = datetime.datetime.now()
     resized = resize_image(img, width, height)

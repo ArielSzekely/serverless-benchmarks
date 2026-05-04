@@ -1,5 +1,5 @@
 # Copyright 2020-2025 ETH Zurich and the SeBS authors. All rights reserved.
-import datetime, io, json, os
+import datetime, io, json, os, time
 # using https://squiggle.readthedocs.io/en/latest/
 from squiggle import transform
 
@@ -14,9 +14,16 @@ def handler(event):
     key = event.get('object').get('key')
     download_path = '/tmp/{}'.format(key)
 
+    transfer_start = time.perf_counter()
     download_begin = datetime.datetime.now()
     client.download(bucket, os.path.join(input_prefix, key), download_path)
     download_stop = datetime.datetime.now()
+    if client._delegated:
+        client._clnt.log_spawn_latency("Paper.Initialization.TransferState",
+                                       int((time.perf_counter() - transfer_start) * 1_000_000))
+    else:
+        client._clnt.log_spawn_latency("Paper.Initialization.DownloadState",
+                                       int((time.perf_counter() - transfer_start) * 1_000_000))
     data = open(download_path, "r").read()
 
     process_begin = datetime.datetime.now()

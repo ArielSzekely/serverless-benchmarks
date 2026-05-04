@@ -1,6 +1,6 @@
 # Copyright 2020-2025 ETH Zurich and the SeBS authors. All rights reserved.
 
-import datetime, json, os, uuid
+import datetime, json, os, time, uuid
 
 # Extract zipped torch model - used in Python 3.8 and 3.9
 # The reason is that torch versions supported for these Python
@@ -33,6 +33,7 @@ def handler(event):
     model_key = event.get('object').get('model')
     download_path = '/tmp/{}-{}'.format(key, uuid.uuid4())
 
+    transfer_start = time.perf_counter()
     image_download_begin = datetime.datetime.now()
     image_path = download_path
     client.download(bucket, os.path.join(input_prefix, key), download_path)
@@ -44,11 +45,20 @@ def handler(event):
         model_path = os.path.join('/tmp', model_key)
         client.download(bucket, os.path.join(model_prefix, model_key), model_path)
         model_download_end = datetime.datetime.now()
+        if client._delegated:
+            client._clnt.log_spawn_latency("Paper.Initialization.TransferState",
+                                           int((time.perf_counter() - transfer_start) * 1_000_000))
+        else:
+            client._clnt.log_spawn_latency("Paper.Initialization.DownloadState",
+                                           int((time.perf_counter() - transfer_start) * 1_000_000))
         model_process_begin = datetime.datetime.now()
+        load_state_start = time.perf_counter()
         model = resnet50(pretrained=False)
         model.load_state_dict(torch.load(model_path, weights_only=False))
         model.eval()
         model_process_end = datetime.datetime.now()
+        client._clnt.log_spawn_latency("Paper.Initialization.AppLoadState",
+                                       int((time.perf_counter() - load_state_start) * 1_000_000))
     else:
         model_download_begin = datetime.datetime.now()
         model_download_end = model_download_begin
