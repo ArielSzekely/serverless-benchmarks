@@ -1,5 +1,6 @@
 # Copyright 2020-2025 ETH Zurich and the SeBS authors. All rights reserved.
 from . import nosql
+from . import storage
 
 nosql_client = nosql.nosql.get_instance()
 
@@ -44,6 +45,7 @@ def query_products(cart_id: str):
 
 def handler(event):
 
+    storage.storage.get_instance()._clnt.log_spawn_latency("Paper.Initialization.None", 0)
     results = []
 
     for request in event["requests"]:

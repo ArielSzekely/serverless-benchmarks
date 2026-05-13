@@ -10,6 +10,7 @@ from . import storage
 
 def handler(event):
 
+    storage.storage.get_instance()._clnt.log_spawn_latency("Paper.Initialization.None", 0)
     request_id = event['request-id']
     address = event['server-address']
     port = event['server-port']

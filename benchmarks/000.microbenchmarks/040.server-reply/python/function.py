@@ -3,9 +3,11 @@
 import socket
 from time import sleep
 
+from . import storage
+
 def handler(event):
 
-    # start timing
+    storage.storage.get_instance()._clnt.log_spawn_latency("Paper.Initialization.None", 0)
     addr = (event.get('ip-address'), event.get('port'))
     socket.setdefaulttimeout(20)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -12,6 +12,7 @@ SEBS_USER_AGENT = "SeBS/1.2 (https://github.com/spcl/serverless-benchmarks) SeBS
 
 def handler(event):
 
+    client._clnt.log_spawn_latency("Paper.Initialization.None", 0)
     bucket = event.get('bucket').get('bucket')
     output_prefix = event.get('bucket').get('output')
     url = event.get('object').get('url')

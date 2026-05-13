@@ -3,6 +3,7 @@ import datetime
 import io
 import os
 import shutil
+import time
 import uuid
 import zlib
 
@@ -26,9 +27,16 @@ def handler(event):
     download_path = '/tmp/{}-{}'.format(key, uuid.uuid4())
     os.makedirs(download_path)
 
+    transfer_start = time.perf_counter()
     s3_download_begin = datetime.datetime.now()
     client.download_directory(bucket, os.path.join(input_prefix, key), download_path)
     s3_download_stop = datetime.datetime.now()
+    if client._delegated:
+        client._clnt.log_spawn_latency("Paper.Initialization.TransferState",
+                                       int((time.perf_counter() - transfer_start) * 1_000_000))
+    else:
+        client._clnt.log_spawn_latency("Paper.Initialization.DownloadState",
+                                       int((time.perf_counter() - transfer_start) * 1_000_000))
     size = parse_directory(download_path)
 
     compress_begin = datetime.datetime.now()

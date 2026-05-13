@@ -2,8 +2,11 @@
 import datetime
 import igraph
 
+from . import storage
+
 def handler(event):
 
+    storage.storage.get_instance()._clnt.log_spawn_latency("Paper.Initialization.None", 0)
     size = event.get('size')
     if "seed" in event:
         import random
